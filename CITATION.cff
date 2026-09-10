@@ -1,12 +1,12 @@
 cff-version: 1.2.0
 message: "Si usas este código, por favor cita este repositorio."
 authors:
-  - family-names: Garcia
-    given-names: Laura
-  - family-names: Leuro
+  - family-names: Otero Santamaria
+    given-names: Nathalia
+  - family-names: Leuro Robles
     given-names: Nerieth
 title: "Código para la validación de registros BioModelos"
-version: "1.0.0"
+version: "2.0.0"
 date-released: "2025-01-01"
 url: "https://github.com/Laur8629/codigo-revision-registros"
 repository-code: "https://github.com/Laur8629/codigo-revision-registros"
@@ -25,11 +25,11 @@ keywords:
 preferred-citation:
   type: software
   authors:
-    - family-names: Garcia
-      given-names: Laura
-    - family-names: Leuro
+    - family-names: Otero Santamaría
+      given-names: Nathalia
+    - family-names: Leuro Robles
       given-names: Nerieth
   title: "Código para la validación de registros BioModelos"
   year: 2025
-  version: "1.0.0"
+  version: "2.0.0"
   url: "https://github.com/Laur8629/codigo-revision-registros"
