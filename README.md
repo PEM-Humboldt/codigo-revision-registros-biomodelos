@@ -35,30 +35,19 @@ Este repositorio contiene herramientas para la validación y revisión de regist
 ## Uso
 
 1. **Preparación de Datos**:  
-   - Descarga y usa la plantilla `Plantilla_campos_registros_BioModelos.xlsx`.  
-   - Completa los datos asegurándote de seguir el formato especificado.  
-   - Guarda el archivo en **formato CSV (delimitado por comas, `.csv`)** para que el script pueda leerlo correctamente.  
+   - Descargue y llene la plantilla `Plantilla_campos_registros_BioModelos.xlsx`. Complete los datos asegurándose de seguir el formato especificado. Guarde el archivo en **formato CSV, TXT, TSV, XLS o XLSX** para que el script pueda leerlo correctamente.
+   - Descargue los registros de GBIF.
 
 2. **Ejecución del Script**:  
-   - Abre R o RStudio.  
-   - Establece el directorio de trabajo al que contiene el script `codigo_validar_registros.R` y el archivo CSV con los datos.  
-   - Ejecuta el script `codigo_validar_registros.R`. Durante la ejecución, se te solicitará que ingreses el nombre del archivo CSV que contiene los registros a validar.  
+   - Abra R o RStudio.  
+   - Establezca el directorio de trabajo como aquel que contiene el script `codigo_validar_registros.R` y el archivo con los datos.  
+   - Adapte las rutas de archivos, directorio de salida, nombre del grupo temático o taxonómico, nombre del experto (si corresponde) y el valor de la variable GBIF según el origen de los datos.
+   - Ejecute el script `codigo_validar_registros.R`.
 
-3. **Revisión de Resultados**:  
-   - Se generará un informe en formato CSV con los registros que presenten errores y las observaciones correspondientes.  
-   - Corrige los errores en la plantilla original y vuelve a ejecutar el script si es necesario.  
-
-## Posibles Errores y Soluciones
-
-Al ejecutar el script, podrían aparecer algunos errores comunes. A continuación, se listan algunos problemas y cómo solucionarlos:
-
-| Error | Posible Causa | Solución |
-|-------|-------------|---------|
-| `Error in read_csv(): cannot open file` | El archivo CSV no está en el mismo directorio que el script o el nombre del archivo es incorrecto. | Verifica que el archivo CSV esté en el mismo directorio y que el nombre ingresado sea exacto. |
-| `Error: Missing columns` | El archivo CSV no tiene los encabezados esperados. | Asegúrate de que el archivo provenga de la plantilla `Plantilla_campos_registros_BioModelos.xlsx`. |
-| `Error in mutate(): object not found` | Algunas columnas esenciales pueden estar vacías o con nombres incorrectos. | Usa la plantilla de Excel correctamente y revisa que los nombres de las columnas sean los correctos. |
-| `Error: unexpected symbol` | Problema con caracteres especiales en el CSV. | Guarda el archivo en formato **CSV UTF-8** y evita caracteres especiales. |
-| `Coordinates outside valid range` | Algunas coordenadas están fuera del rango permitido. | Revisa que los valores de latitud y longitud sean correctos. |
+3. **Revisión de Resultados**:
+   - Se generará un informe en formato XLSX que reporta los errores a nivel de campo y nivel de registro, realizando gráficas descriptivas para una mejor comprensión de los errores.
+   - Se generará un archivo con los registros originales, y con una única corrección asociada a errores en el campo `occurrenceID`, sobre el cual generar las correcciones necesarias presentadas en el reporte
+   - Corrija los errores en la plantilla original y vuelve a ejecutar el script si es necesario.  
 
 
 ## 📜 Licencia
@@ -73,15 +62,15 @@ El detalle de las citas utilizadas en el proyecto está en el siguiente archivo:
 
 - [CITATION.cff](./CITATION.cff)
 
-Si usas este software en tu investigación, por favor cítalo así:
+Si usa este software en su investigación, por favor cítelo así:
 
 ```bibtex
 @software{validacion_registros_biomodelos,
-  author       = {García, Laura and Leuro, Nerieth},
+  author       = {Otero, Nathalia and Leuro, Nerieth},
   title        = {Código para la validación de registros BioModelos},
-  year         = {2025},
+  year         = {2026},
   publisher    = {GitHub},
-  version      = {1.0.0},
+  version      = {2.0.0},
   url          = {https://github.com/Laur8629/codigo-revision-registros},
   note         = {Archivo principal: codigo_validar_registros.R}
 }
@@ -91,6 +80,6 @@ Si usas este software en tu investigación, por favor cítalo así:
 ## Autores
 Gerencia de Información Científica - Dirección de conocimiento - Instituto de Investigación de Recursos Biológicos Alexander von Humboldt - Colombia
 
-Laura Sofia Garcia - [Laur8629](./https://github.com/Laur8629)
+Nathalia Otero Santamaría - [nathalia-otero](./https://github.com/nathalia-otero)
 
 Nerieth Goretti Leuro Robles - [goreleuro94](./(https://github.com/goreleuro94))
