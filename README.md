@@ -49,6 +49,11 @@ Este repositorio contiene herramientas para la validación y revisión de regist
    - Se generará un archivo con los registros originales, y con una única corrección asociada a errores en el campo `occurrenceID`, sobre el cual generar las correcciones necesarias presentadas en el reporte
    - Corrija los errores en la plantilla original y vuelve a ejecutar el script si es necesario.  
 
+## Errores y soluciones
+
+| Error | Posible Causa | Solución |
+|-------|-------------|---------|
+| Formato de archivo no compatible. Use archivos .csv, .txt, .tsv, .xls o .xlsx. | El archivo ingresado tiene una extensión que no es compatible con el script. | Guarde el archivo como CSV, TXT, TSV, XLS o XLSX y verifique que la extensión corresponda al formato del archivo. |
 
 ## 📜 Licencia
 
