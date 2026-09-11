@@ -12,7 +12,7 @@ Este repositorio contiene herramientas para la validación y revisión de regist
   - **Verificación de Coordenadas**: Comprueba que las coordenadas geográficas estén dentro de los límites permitidos y no correspondan a ubicaciones improbables.
   - **Generación de Informe**: Produce un informe detallado en formato Excel con los hallazgos de la validación, indicando los registros que requieren corrección.
 
-- **`Plantilla_campos_registros_BioModelos.xlsx`**: Plantilla en Excel que define los campos requeridos y su formato para los registros de especies en BioModelos. Se recomienda usar esta plantilla para estructurar los datos antes de la validación.
+- **`Plantilla_registros.xlsx`**: Plantilla en Excel que define los campos requeridos y su formato para los registros de especies en BioModelos. Se recomienda usar esta plantilla para estructurar los datos antes de la validación.
 
 ## Requisitos
 
