@@ -51,7 +51,7 @@ Este repositorio contiene herramientas para la validación y revisión de regist
 
 ## Errores y soluciones
 
-| Error | Posible Causa | Solución |
+| Error | Causa | Solución |
 |-------|-------------|---------|
 | Formato de archivo no compatible. Use archivos .csv, .txt, .tsv, .xls o .xlsx. | El archivo ingresado tiene una extensión que no es compatible con el script. | Guarde el archivo como CSV, TXT, TSV, XLS o XLSX y verifique que la extensión corresponda al formato del archivo. |
 
