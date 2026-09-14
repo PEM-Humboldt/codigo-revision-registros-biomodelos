@@ -700,11 +700,15 @@ validate_file <- function(file_path, output_dir, req, mand, basis_of_record, gbi
   
   # Definir una lista con extensiones y sus delimitadores de columnas
   ext_delim <- list("csv" = ",", "txt" = "\t", "tsv" = "\t")
+
+  # Encontrar el encoding
+  encoding <- readr::guess_encoding(file_path)$encoding[1]
   
   # Leer todos los campos como si fueran objetos tipo "character" para evitar transformaciones en los datos
   if (file_ext %in% names(ext_delim)){
     data <- read_delim(file_path, delim = ext_delim[[file_ext]], show_col_types = FALSE, trim_ws = TRUE, 
-                       progress = FALSE, col_types = "c",  name_repair = "minimal", na = character())
+                       progress = FALSE, col_types = "c",  name_repair = "minimal", na = character(),
+                      locale = readr::locale(encoding = encoding))
     
     # Guardar los nombres originales (pueden tener duplicados)
     original_col_names <- colnames(data)
