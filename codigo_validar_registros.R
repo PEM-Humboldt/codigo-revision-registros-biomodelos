@@ -436,7 +436,7 @@ validate_occ_ID <- function(x, gbif, group, downloadDate = NULL) {
   if(gbif){
     patron <- paste0("^gbifID:[0-9]+:", group, ":", downloadDate, "$")
   } else {
-  patron <- "^expertID:[A-Za-z-]+:[0-9]+:[A-Za-z-]+:[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+  patron <- "^expertID:[A-Za-z_-]+:[0-9]+:[A-Za-z_-]+:[0-9]{4}-[0-9]{2}-[0-9]{2}$"
   }
   if (!grepl(patron, x)) return(FALSE)
   
@@ -472,7 +472,7 @@ unexpected_char_err <- function(i, col, value){
   list(Fila = i + 1, 
        Columna = col, 
        Tipo = "Caracteres",
-       Mensaje = paste0("El campo '", col, "' contiene caracteres inesperados (©, �, ¿, ?)."), 
+       Mensaje = paste0("El campo '", col, "' contiene caracteres inesperados (©, �)."), 
        Valor = value)
 }
 
@@ -683,6 +683,46 @@ insert_stats_plot <- function(wb, startRow){
   )
 }
 
+# *************************************************************************************************************
+# 6) Funciones para corregir formatos
+# *************************************************************************************************************
+
+# Función para corregir la codificaciones mezcladas
+# Función para corregir las codificaciones mezcladas
+correct_mojibake <- function(x) {
+  
+  x <- as.character(x)
+  
+  res <- sapply(x, function(valor) {
+    
+    tryCatch({
+      
+      result <- iconv(
+        valor,
+        from = "UTF-8",
+        to = "latin1" # Se puede cambiar según las diferentes codificaciones del archivo de registros original
+      )
+      
+      result <- iconv(
+        result,
+        from = "latin1",
+        to = "UTF-8" # Se puede cambiar según las diferentes codificaciones del archivo de registros original
+      )
+      
+      result
+      
+    }, error = function(e) {
+      
+      # Si esta fila da error, conserva el valor original
+      valor
+      
+    })
+    
+  }, USE.NAMES = FALSE)
+  
+  return(res)
+}
+
 
 # ########################################################################################################### #
 #                                    Crear función de validación de campos                                    #
@@ -708,7 +748,7 @@ validate_file <- function(file_path, output_dir, req, mand, basis_of_record, gbi
   if (file_ext %in% names(ext_delim)){
     data <- read_delim(file_path, delim = ext_delim[[file_ext]], show_col_types = FALSE, trim_ws = TRUE, 
                        progress = FALSE, col_types = "c",  name_repair = "minimal", na = character(),
-                      locale = readr::locale(encoding = encoding))
+                      locale = readr::locale(encoding = encoding), quote = "\")
     
     # Guardar los nombres originales (pueden tener duplicados)
     original_col_names <- colnames(data)
@@ -796,8 +836,17 @@ validate_file <- function(file_path, output_dir, req, mand, basis_of_record, gbi
 
   
   # ***********************************************************************************************************
-    # 3) Validaciones por filas y columnas 
-  # *************************************************************************
+  # 3) Validaciones por filas y columnas 
+  # ***********************************************************************************************************
+  
+  # Corregir codificación en columnas de texto
+  for (col in char_cols) {
+    tryCatch({
+      data[[col]] <- correct_mojibake(data[[col]])
+    }, error = function(e) {
+      message("Error en la columna: ", col)
+    })
+  }
   
   # Determinar cantidad de filas y columnas
   n_rows <- nrow(data)
@@ -854,7 +903,7 @@ validate_file <- function(file_path, output_dir, req, mand, basis_of_record, gbi
         }
         
         # Validar la presencia de caracteres inesperados
-        if (grepl("©|\uFFFD|\\?|¿", valor_chr)) {
+        if (grepl("©|\uFFFD", valor_chr)) {
           # Añadir error ante presencia de caracteres inesperados
           errors <- append(errors, list(unexpected_char_err(i, col_name, valor_chr)))
         }
