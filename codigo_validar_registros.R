@@ -472,7 +472,7 @@ unexpected_char_err <- function(i, col, value){
   list(Fila = i + 1, 
        Columna = col, 
        Tipo = "Caracteres",
-       Mensaje = paste0("El campo '", col, "' contiene caracteres inesperados (©, �)."), 
+       Mensaje = paste0("El campo '", col, "' contiene caracteres inesperados (©, �, ?, ¿)."), 
        Valor = value)
 }
 
@@ -903,7 +903,7 @@ validate_file <- function(file_path, output_dir, req, mand, basis_of_record, gbi
         }
         
         # Validar la presencia de caracteres inesperados
-        if (grepl("©|\uFFFD", valor_chr)) {
+        if (grepl("©|\uFFFD|\\?|¿", valor_chr)) {
           # Añadir error ante presencia de caracteres inesperados
           errors <- append(errors, list(unexpected_char_err(i, col_name, valor_chr)))
         }
