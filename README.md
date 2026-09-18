@@ -37,7 +37,8 @@ Este repositorio contiene herramientas para la validación y revisión de regist
 1. **Preparación de Datos**:  
    - Descargue y llene la plantilla `Plantilla_campos_registros_BioModelos.xlsx`. Complete los datos asegurándose de seguir el formato especificado. Guarde el archivo en **formato CSV, TXT, TSV, XLS o XLSX** para que el script pueda leerlo correctamente.
    - Descargue los registros de GBIF.
-
+   - Al exportar el archivo, asegúrese de utilizar la codificación **UTF-8**.
+   - 
 2. **Ejecución del Script**:  
    - Abra R o RStudio.  
    - Establezca el directorio de trabajo como aquel que contiene el script `codigo_validar_registros.R` y el archivo con los datos.  
