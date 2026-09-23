@@ -28,6 +28,9 @@
 #                           Cargar librerías, y definir directorios y archivos de entrada                                #
 # ###################################################################################################################### #
 
+# Remover archivos temporales
+unlink(tempdir(), recursive = TRUE)
+
 # Cargar librerías
 library(readr)
 library(readxl)
@@ -46,7 +49,8 @@ setwd(main_dir)
 
 # Definir las rutas de archivo de entrada y del directorio de salida
 file_path  <- "F1_registros_originales/Registros_Fabio-Zabala_Anfibios-amazonicos_2026.csv" 
-output_dir <- "F2_revision_estructura_campos/Campos_minimos_expertos/"
+output_dir_occ <- "F2_revision_estructura_campos/Registros_campos_minimos/"
+output_dir_rep <- "F2_revision_estructura_campos/Reportes_campos_minimos/"
 
 # Asignar nombre del grupo temático o taxonómico
 # En vez de espacios para separar, utilice '-'.Ejemplo: Aves-Endemicas
@@ -56,12 +60,17 @@ group <- "Anfibios-amazonicos"
 # según corresponda
 gbif <- FALSE
 expert <- "ANM-JCD-FZ"
-#downloadDate <- "2026-09-01"
+year_c <- 2026
+downloadDate <- NULL
 
 
 # Crear carpetas y subcarpetas del directorio de salida en caso de que no existan
-if (!dir.exists(output_dir)) {
-  dir.create(output_dir, recursive = TRUE)
+if (!dir.exists(output_dir_occ)) {
+  dir.create(output_dir_occ, recursive = TRUE)
+}
+
+if (!dir.exists(output_dir_rep)) {
+  dir.create(output_dir_rep, recursive = TRUE)
 }
 
 
@@ -93,6 +102,10 @@ if (gbif){
 basis_of_record <- c("PreservedSpecimen","LivingSpecimen","HumanObservation","MachineObservation",
                      "MaterialSample","FossilSpecimen","Occurrence","MaterialEntity","Event","Taxon",
                      "MaterialCitation","OtherSpecimen")
+
+# Columnas que pueden contener caracteres
+char_cols <- c("occurrenceID", "institutionCode", "collectionCode", "catalogNumber", "recordedBy", "identifiedBy", 
+            "country", "stateProvince", "county", "locality", "source", "createdCitationBm")
 
 
 # ########################################################################################################### #
@@ -182,8 +195,8 @@ validate_date <- function(date, format) {
         return("porque el año está en el futuro.")
       }
       
-      if (year < 1700) {
-        return("porque el año es anterior a 1700. Revise si la antigüedad del registro es correcta.")
+      if (year < 1900) {
+        return("porque el año es anterior a 1900. Revise si la antigüedad del registro es correcta.")
       }
       
       # No hay más información (mes/día) que validar; se retorna aquí
@@ -235,8 +248,8 @@ validate_date <- function(date, format) {
     if (date_ok > Sys.Date()) {
       return("porque la fecha está en el futuro.")
     }
-    if (date_ok < as.Date("1700-01-01")) {
-      return("porque la fecha es anterior al año 1700. Revise si la antigüedad del registro es correcta.")
+    if (date_ok < as.Date("1900-01-01")) {
+      return("porque la fecha es anterior al año 1900. Revise si la antigüedad del registro es correcta.")
     }
     
     TRUE
@@ -265,7 +278,7 @@ validate_date_range <- function(x) {
   
   starting <- parts[1]
   ending <- parts[2]
-  
+
   
   # 1) Validar caso aaaa/AAAA
   if (grepl("^\\d{4}/\\d{4}$", x)) {
@@ -276,8 +289,8 @@ validate_date_range <- function(x) {
     if(is.na(start_year) || is.na(end_year)){
       return("porque el formato es inválido.")
     }
-    if(start_year < 1700 || end_year < 1700){
-     return("porque hay un año que es anterior a 1700. Revise si la antigüedad del registro es correcta.")
+    if(start_year < 1900 || end_year < 1900){
+     return("porque hay un año que es anterior a 1900. Revise si la antigüedad del registro es correcta.")
     } 
     if(start_year > as.integer(format(Sys.Date(), "%Y")) || end_year > as.integer(format(Sys.Date(), "%Y"))){
       return("porque hay un año que está en el futuro.")
@@ -700,13 +713,13 @@ correct_mojibake <- function(x) {
       result <- iconv(
         valor,
         from = "UTF-8",
-        to = "latin1" # Se puede cambiar según las diferentes codificaciones del archivo de registros original
+        to = "latin1"
       )
       
       result <- iconv(
         result,
         from = "latin1",
-        to = "UTF-8" # Se puede cambiar según las diferentes codificaciones del archivo de registros original
+        to = "UTF-8"
       )
       
       result
@@ -723,13 +736,12 @@ correct_mojibake <- function(x) {
   return(res)
 }
 
-
 # ########################################################################################################### #
 #                                    Crear función de validación de campos                                    #
 # ########################################################################################################### #
 
 # Función para validar los campos
-validate_file <- function(file_path, output_dir, req, mand, basis_of_record, gbif, group, downloadDate = NULL, expert = NULL) {
+validate_file <- function(file_path, output_dir_occ, req, mand, basis_of_record, gbif, group, year_c, downloadDate = NULL, expert = NULL) {
   
   # ***********************************************************************************************************
   # 1) Leer archivo teniendo en cuenta la extension del archivo de entrada
@@ -740,15 +752,15 @@ validate_file <- function(file_path, output_dir, req, mand, basis_of_record, gbi
   
   # Definir una lista con extensiones y sus delimitadores de columnas
   ext_delim <- list("csv" = ",", "txt" = "\t", "tsv" = "\t")
-
+  
   # Encontrar el encoding
   encoding <- readr::guess_encoding(file_path)$encoding[1]
   
   # Leer todos los campos como si fueran objetos tipo "character" para evitar transformaciones en los datos
   if (file_ext %in% names(ext_delim)){
     data <- read_delim(file_path, delim = ext_delim[[file_ext]], show_col_types = FALSE, trim_ws = TRUE, 
-                       progress = FALSE, col_types = "c",  name_repair = "minimal", na = character(),
-                      locale = readr::locale(encoding = encoding), quote = "\")
+                       progress = FALSE, col_types = "c",  name_repair = "minimal", na = character(), 
+                       locale = readr::locale(encoding = encoding), quote = "\"")
     
     # Guardar los nombres originales (pueden tener duplicados)
     original_col_names <- colnames(data)
@@ -768,7 +780,7 @@ validate_file <- function(file_path, output_dir, req, mand, basis_of_record, gbi
     original_col_names <- as.character(headers[1, ])
     
     # Leer los datos
-    data <- read_excel(file_path, col_types = "text", .name_repair = "minimal")
+    data <- read_excel(file_path, col_types = "text", name_repair = "minimal")
     
     # Asignar nombres temporales únicos solo para poder operar con dplyr
     colnames(data) <- make.unique(original_col_names)
@@ -781,6 +793,7 @@ validate_file <- function(file_path, output_dir, req, mand, basis_of_record, gbi
       stop("Formato no compatible. Use .csv, .txt, .tsv o .xls/.xlsx.")
   }
   
+  
   # Identificar nombres de columnas duplicados
   duplicated_cols <- unique(
     original_col_names[
@@ -789,6 +802,8 @@ validate_file <- function(file_path, output_dir, req, mand, basis_of_record, gbi
         original_col_names != ""
     ]
   )
+  
+  
   
   # ***********************************************************************************************************
   # 2) Validar existencia de campos 
@@ -836,8 +851,8 @@ validate_file <- function(file_path, output_dir, req, mand, basis_of_record, gbi
 
   
   # ***********************************************************************************************************
-  # 3) Validaciones por filas y columnas 
-  # ***********************************************************************************************************
+    # 3) Validaciones por filas y columnas 
+  # *************************************************************************
   
   # Corregir codificación en columnas de texto
   for (col in char_cols) {
@@ -1093,8 +1108,8 @@ validate_file <- function(file_path, output_dir, req, mand, basis_of_record, gbi
   # Crear nombre del archivo para guardar los datos corregidos
   # (la única corrección es el occurrenceID en caso de presentar error),
   # conservando el nombre del archivo de entrada
-  file_base <- tools::file_path_sans_ext(basename(file_path))
-  val_file <- file.path(output_dir, paste0(file_base, "_val1.xlsx"))
+  
+  val_file <- file.path(output_dir_occ, paste0("Registros-campos-minimos_",expert, "_", group, "_", year_c, ".xlsx"))
   
   # Guardar archivo
   write_xlsx(data, val_file)
@@ -1125,7 +1140,7 @@ validate_file <- function(file_path, output_dir, req, mand, basis_of_record, gbi
 #                           Crear función para calcular estadísticos de los errores                           #
 # ########################################################################################################### #
 
-errors_stat <- function(file_path, output_dir, val_cols_df, errors_df, req){
+errors_stat <- function(file_path, output_dir_rep, val_cols_df, errors_df, req, expert, group, year_c){
 
   # Crear el libro de trabajo 
   wb <- createWorkbook()
@@ -1446,8 +1461,8 @@ errors_stat <- function(file_path, output_dir, val_cols_df, errors_df, req){
   # ***********************************************************************************************************
   
   # Crear nombre del archivo de reporte
-  file_base   <- tools::file_path_sans_ext(basename(file_path))
-  report_file <- file.path(output_dir, paste0(file_base, "_reporte_validacion.xlsx"))
+
+  report_file <- file.path(output_dir_rep, paste0("Reporte-campos-minimos_", expert, "_", group, "_", year_c, ".xlsx"))
   
   saveWorkbook(wb, report_file, overwrite = TRUE)
   
@@ -1462,15 +1477,17 @@ errors_stat <- function(file_path, output_dir, val_cols_df, errors_df, req){
 
 validate <- validate_file(
   file_path = file_path,
-  output_dir = output_dir,
+  output_dir_occ = output_dir_occ,
   req = req,
   mand = mand,
   basis_of_record = basis_of_record,
   gbif = gbif,
   group = group,
   downloadDate = downloadDate,
-  expert = expert
+  expert = expert,
+  year_c = year_c
 )
 
-errors_stat(file_path, output_dir, validate[[1]], validate[[2]], req)
+errors_stat(file_path, output_dir_rep, validate[[1]], validate[[2]], req, expert, group, year_c)
+
 
